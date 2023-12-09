@@ -20,6 +20,11 @@ SHELL ["/bin/bash", "-c"]
 ADD . /go/src/github.com/mindoc-org/mindoc
 
 WORKDIR /install-golang
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=1 \
+    GOARCH=amd64
+
 RUN wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz -O golang.tar.gz \
     && tar -zxvf golang.tar.gz -C /usr/local/ \
     && echo 'export PATH=$PATH:/usr/local/go/bin' | tee -a /etc/profile \
