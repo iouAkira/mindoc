@@ -1,13 +1,8 @@
-FROM golang:1.20.12-alpine AS build
+FROM golang:1.18.1-alpine AS build
+
+RUN apk --no-cache add make git gcc libtool musl-dev ca-certificates dumb-init 
 
 ARG TAG=0.0.1
-
-# 编译-环境变量
-ENV GO111MODULE=on
-ENV GOPROXY=https://goproxy.cn,direct
-ENV CGO_ENABLED=1
-# ENV GOARCH=amd64
-# ENV GOOS=linux
 
 # 工作目录
 ADD . /go/src/github.com/mindoc-org/mindoc
@@ -18,6 +13,7 @@ RUN go env
 RUN go mod tidy -v
 RUN go build -v -o mindoc_linux_amd64 -ldflags "-w -s -X 'main.VERSION=$TAG' -X 'main.BUILD_TIME=`date`' -X 'main.GO_VERSION=`go version`'"
 RUN cp conf/app.conf.example conf/app.conf
+
 # 清理不需要的文件
 RUN rm appveyor.yml docker-compose.yml Dockerfile .travis.yml .gitattributes .gitignore go.mod go.sum main.go README.md simsun.ttc start.sh conf/*.go
 RUN rm -rf cache commands controllers converter .git .github graphics mail models routers utils
