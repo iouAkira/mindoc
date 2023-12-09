@@ -11,25 +11,22 @@ RUN apt update \
     # 安装文泉驿字体
     && apt install -y fonts-wqy-microhei fonts-wqy-zenhei \
     # 安装中文语言包
-    && apt-get install -y locales language-pack-zh-hans language-pack-zh-hans-base
-
-# 切换默认shell为bash
-SHELL ["/bin/bash", "-c"]
+    && apt install -y locales language-pack-zh-hans language-pack-zh-hans-base \
+    && apt install -y gcc  
 
 # 工作目录
 ADD . /go/src/github.com/mindoc-org/mindoc
 
 WORKDIR /install-golang
 
-ENV GO111MODULE=on \
-    CGO_ENABLED=1 \
-    GOARCH=amd64
+RUN wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz -O golang.tar.gz \
+    && tar -zxvf golang.tar.gz -C /usr/local/
 
-RUN wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz -O golang.tar.gz \
-    && tar -zxvf golang.tar.gz -C /usr/local/ \
-    && echo 'export PATH=$PATH:/usr/local/go/bin' | tee -a /etc/profile \
-    && source /etc/profile \
-    && go env \
+ENV PATH=$PATH:/usr/local/go/bin \
+    GO111MODULE=on \
+    CGO_ENABLED=1
+
+RUN go env \
     && cd /go/src/github.com/mindoc-org/mindoc \
     && go mod tidy -v \
     && go build -v -o mindoc_linux_amd64 -ldflags "-w -s -X 'main.VERSION=$TAG' -X 'main.BUILD_TIME=`date`' -X 'main.GO_VERSION=`go version`'" \
@@ -43,9 +40,13 @@ RUN mkdir -p /mindoc/__default_assets__ \
     && mv /go/src/github.com/mindoc-org/mindoc/views /mindoc/__default_assets__/ \
     && mv /go/src/github.com/mindoc-org/mindoc/uploads /mindoc/__default_assets__/ \
     && rm -rf /install-golang \
-    && rm -rf /usr/local/go/ \
-    && rm -rf /go/src/github.com/mindoc-org/mindoc/ \
-    && apt autoremove -y
+    && rm -rf /usr/local/go/* \
+    && rm -rf /go/src/github.com/mindoc-org/mindoc/* \
+    && apt remove -y gcc \
+    && apt clean - \
+    && apt autoclean -y \
+    && apt autoremove -y \
+    && rm -rf /var/cache/*
 
 WORKDIR /mindoc
 # 必要的文件复制
