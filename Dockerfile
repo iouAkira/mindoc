@@ -1,4 +1,4 @@
-FROM amd64/golang:1.20.12 AS build
+FROM golang:1.20.12-alpine AS build
 
 ARG TAG=0.0.1
 
