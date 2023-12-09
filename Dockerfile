@@ -6,8 +6,8 @@ ARG TAG=0.0.1
 ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.cn,direct
 ENV CGO_ENABLED=1
-ENV GOARCH=amd64
-ENV GOOS=linux
+# ENV GOARCH=amd64
+# ENV GOOS=linux
 
 # 工作目录
 ADD . /go/src/github.com/mindoc-org/mindoc
